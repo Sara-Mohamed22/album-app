@@ -18,15 +18,15 @@ class AppCubit extends Cubit<AppStates> {
 
   List<dynamic> allAlbums = [];
 
-  late bool _isLastPage;
-  late int _pageNumber;
-  late bool _error;
-  late bool _loading;
-  final int _numberOfPostsPerRequest = 10;
-  final int _nextPageTrigger = 3;
-  late ScrollController? _scrollController;
 
-  getAllAlbumes() {
+  int page =0;
+  bool hasMore =true ;
+  bool isLoading = false ;
+  List<dynamic> items = [];
+
+
+
+ /* getAllAlbumes() {
 
     emit(GetAllAlbumsLoadingState());
 
@@ -36,8 +36,8 @@ class AppCubit extends Cubit<AppStates> {
       query: {
 
         'lang': CashHelper.getData(key: "lang") ?? 'en' ,
-        // '_start' : 0,
-        // '_limit' : 10,
+        '_start' : page ,
+        '_limit' : 10 ,
       },
         // token: CashHelper.getData(key: 'token')
 
@@ -46,26 +46,83 @@ class AppCubit extends Cubit<AppStates> {
 
         print('albumssss  ${value.data }');
 
+
+
         value.data.forEach((album) {
         allAlbums.add(AlbumModel.FromJson(album));
         });
 
-        _isLastPage = allAlbums.length < _numberOfPostsPerRequest;
-        _loading = false;
-        _pageNumber = _pageNumber + 1;
 
 
-        print('albumArray  ${allAlbums[0].title}');
+
+        print('albumArray  ${allAlbums.length }');
         emit(GetAllAlbumsSucessState());
 
     }).catchError((e) {
 
-      _loading = false;
-      _error = true;
-
       print('errroxxx ${e.toString()}');
       emit(GetAllAlbumsErrorState(e.toString()));
     });
+  }*/
+
+
+  Future  fetchAPI()async
+  {
+
+    const limit = 10 ;
+
+    emit(GetAllAlbumsLoadingState());
+
+    DioHelper.
+    getData(
+      url: AllAlbums ,
+      query: {
+
+        'lang': CashHelper.getData(key: "lang") ?? 'en' ,
+        '_start' : page ,
+        '_limit' : 10 ,
+      },
+      // token: CashHelper.getData(key: 'token')
+
+    )!.then((value) {
+      if(isLoading) return ;
+      isLoading = true ;
+
+      page++ ;
+      isLoading = false ;
+
+      if(value.data.length < limit )
+      {
+        hasMore = false ;
+      }
+
+     /* items.addAll(value.data.map<String>((item){
+
+        print('ooooo ${item}');
+        final title =item['title'];
+        // return ' $title ${++page -2 +1 }' ;
+        return ' $title ' ;
+
+
+      }).toList());*/
+
+      value.data.forEach((album) {
+        allAlbums.add(AlbumModel.FromJson(album));
+      });
+
+      print('4444444444444 ${allAlbums}');
+
+      emit(GetAllAlbumsSucessState());
+
+    }).catchError((e){
+      print('errroxxx ${e.toString()}');
+      emit(GetAllAlbumsErrorState(e.toString()));
+
+    });
+
+
+
+
   }
 
 

@@ -1,10 +1,13 @@
-
+import 'dart:convert';
 import 'package:album_app/layout/cubit/app-cubit.dart';
 import 'package:album_app/module/albumInfo/albumInfo.dart';
-import 'package:album_app/shared/component.dart';
 import 'package:album_app/shared/style/fonts.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../layout/cubit/app-state.dart';
+import '../../shared/component.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -15,75 +18,110 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  // late bool _isLastPage;
-  // late int _pageNumber;
-  // late bool _error;
-  // late bool _loading;
-  // final int _numberOfPostsPerRequest = 10;
-  // late List<Post> _posts;
-  // final int _nextPageTrigger = 3;
-
+  final _controller = ScrollController() ;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
 
-    // _pageNumber = 0;
-    // _posts = [];
-    // _isLastPage = false;
-    // _loading = true;
-    // _error = false;
-    // AppCubit.get(context).getAllAlbumes();
+    _controller.addListener( ()async {
+      if(_controller.position.maxScrollExtent == _controller.offset)
+       {
+         AppCubit.get(context).fetchAPI();
+       }
+      });
+
   }
 
 
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    super.dispose();
+  }
 
 
   @override
   Widget build(BuildContext context) {
 
     AppCubit cubit = AppCubit.get(context);
-    print('77 ${cubit.allAlbums.length}');
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Albums', style: TextStyle(
-          fontFamily: fontFamily,
-          fontSize: FontSizeManager.s18,
-          fontWeight: FontWeightManager.light,
+    return BlocConsumer<AppCubit, AppStates>(
+      listener:(context,state){} ,
+    builder: (context, state) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Albums', style: TextStyle(
+            fontFamily: fontFamily,
+            fontSize: FontSizeManager.s18,
+            fontWeight: FontWeightManager.light,
 
-        ),),
-        centerTitle: true,
-        automaticallyImplyLeading: false,
-      ),
-      body:
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0 ),
-        child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200,
-                childAspectRatio: 3 / 2,
-                crossAxisSpacing: 20,
-                mainAxisSpacing: 20),
-            itemCount: cubit.allAlbums.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                child: Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                      color: Colors.amber,
-                      borderRadius: BorderRadius.circular(15)),
-                  child: Text(cubit.allAlbums[index].title ,
-                    textAlign: TextAlign.center,),
-                ),
-                onTap: (){
-                  navTo(context, AlbumInfo());
-                },
-              );
-            }),
-      ),
-    );
+          ),),
+          centerTitle: true,
+          automaticallyImplyLeading: false,
+        ),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              cubit.isLoading = false;
+              cubit.hasMore = true;
+              cubit.page = 0;
+              cubit.allAlbums.clear();
+            });
+
+            await cubit.fetchAPI();
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20.0),
+            child: ListView.separated(
+              controller: _controller,
+              itemBuilder: (context, index) {
+                if (index < cubit.allAlbums.length) {
+                  final item = cubit.allAlbums[index].title;
+                  return InkWell(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Container(
+                        height: 100,
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: Colors.amber,
+                            borderRadius: BorderRadius.circular(20)),
+                        child: Text( item ,
+                          textAlign: TextAlign.center,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 5,
+                        softWrap: true,),
+                      ),
+                    ),
+                    onTap: (){
+                      print('indexx $index');
+                      navTo(context, AlbumInfo(albumId: cubit.allAlbums[index].id,) );
+                    },
+                  );
+                }
+                else {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Center(
+                        child:cubit.hasMore ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 200.0),
+                          child: CircularProgressIndicator(),
+                        ) :
+                        Text('No Data to Load ...')),
+                  );
+                }
+              },
+              itemCount: cubit.allAlbums.length+ 1,
+            separatorBuilder: (context, index)=> SizedBox(height: 20,),),
+          ),
+        ),
+      );
+
+    });
   }
 }

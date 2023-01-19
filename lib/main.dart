@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'module/homeScreen/homeScreen.dart';
 import 'layout/cubit/app-cubit.dart';
 import 'module/loginScreen/loginScreen.dart';
 import 'network/local/cashHelper.dart';
@@ -37,12 +38,14 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers:
       [
-        BlocProvider(create: (context)=> AppCubit()..getAllAlbumes() ) ,
+        BlocProvider(create: (context)=> AppCubit()..fetchAPI() ) ,
       ],
       child: MaterialApp(
          debugShowCheckedModeBanner:  false ,
         title: 'Album App',
-        home: LoginScreen() ,
+        home:
+        HomeScreen()
+        //LoginScreen() ,
 
       ),
     );
