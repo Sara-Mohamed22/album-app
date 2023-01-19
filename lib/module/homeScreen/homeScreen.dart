@@ -4,6 +4,7 @@ import 'package:album_app/module/albumInfo/albumInfo.dart';
 import 'package:album_app/shared/style/fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 import '../../layout/cubit/app-state.dart';
 import '../../shared/component.dart';
@@ -54,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
     builder: (context, state) {
       return Scaffold(
         appBar: AppBar(
-          title: Text('Albums', style: TextStyle(
+          title: Text('Albums'.tr, style: TextStyle(
             fontFamily: fontFamily,
             fontSize: FontSizeManager.s18,
             fontWeight: FontWeightManager.light,
@@ -85,11 +86,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20.0),
                       child: Container(
-                        height: 100,
+                        height: 60,
                         padding: EdgeInsets.symmetric(horizontal: 10),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            color: Colors.amber,
+                            color: Colors.black12,
                             borderRadius: BorderRadius.circular(20)),
                         child: Text( item ,
                           textAlign: TextAlign.center,
@@ -99,8 +100,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     onTap: (){
-                      print('indexx $index');
                       navTo(context, AlbumInfo(albumId: cubit.allAlbums[index].id,) );
+                      cubit.getAllPhotos(cubit.allAlbums[index].id);
                     },
                   );
                 }
@@ -109,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: EdgeInsets.symmetric(vertical: 20),
                     child: Center(
                         child:cubit.hasMore ? Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 200.0),
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
                           child: CircularProgressIndicator(),
                         ) :
                         Text('No Data to Load ...')),

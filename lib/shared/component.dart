@@ -45,3 +45,5 @@ Color changeColorToast( ToastState state)
 
   return color ;
 }
+
+

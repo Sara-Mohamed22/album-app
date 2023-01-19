@@ -1,6 +1,7 @@
 
 
 import 'package:album_app/model/albumModel.dart';
+import 'package:album_app/model/photoModel.dart';
 import 'package:album_app/network/endPoint.dart';
 import 'package:album_app/network/local/cashHelper.dart';
 import 'package:album_app/network/remote/dioHelper.dart';
@@ -17,6 +18,8 @@ class AppCubit extends Cubit<AppStates> {
 
 
   List<dynamic> allAlbums = [];
+  List<dynamic> photos = [];
+
 
 
   int page =0;
@@ -24,46 +27,6 @@ class AppCubit extends Cubit<AppStates> {
   bool isLoading = false ;
   List<dynamic> items = [];
 
-
-
- /* getAllAlbumes() {
-
-    emit(GetAllAlbumsLoadingState());
-
-    DioHelper.
-    getData(
-        url: AllAlbums ,
-      query: {
-
-        'lang': CashHelper.getData(key: "lang") ?? 'en' ,
-        '_start' : page ,
-        '_limit' : 10 ,
-      },
-        // token: CashHelper.getData(key: 'token')
-
-
-    )!.then((value) {
-
-        print('albumssss  ${value.data }');
-
-
-
-        value.data.forEach((album) {
-        allAlbums.add(AlbumModel.FromJson(album));
-        });
-
-
-
-
-        print('albumArray  ${allAlbums.length }');
-        emit(GetAllAlbumsSucessState());
-
-    }).catchError((e) {
-
-      print('errroxxx ${e.toString()}');
-      emit(GetAllAlbumsErrorState(e.toString()));
-    });
-  }*/
 
 
   Future  fetchAPI()async
@@ -120,10 +83,42 @@ class AppCubit extends Cubit<AppStates> {
 
     });
 
-
-
-
   }
+
+
+
+   getAllPhotos(int id)
+   {
+     emit(GetAllPhotosLoadingState());
+
+     print('iiiiiiid $id');
+     DioHelper.
+     getData(
+       url: '$AllAlbums/$id/$AllPhotos' ,
+       query: {
+
+         // 'lang': CashHelper.getData(key: "lang") ?? 'en' ,
+       },
+       // token: CashHelper.getData(key: 'token')
+
+
+     )!.then((value) {
+
+       photos = [] ;
+       value.data.forEach((album) {
+         photos.add(PhotoModel.FromJson(album));
+       });
+
+       emit(GetAllPhotosSucessState());
+
+     }).catchError((e) {
+
+       print('errroxxx ${e.toString()}');
+       emit(GetAllPhotosErrorState(e.toString()));
+     });
+
+   }
+
 
 
 
